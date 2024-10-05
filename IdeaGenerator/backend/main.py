@@ -103,7 +103,16 @@ async def get_dataset_documents(dataset_id: str):
     else:
         raise HTTPException(status_code=response.status_code, detail=response.text)
 
-
+# 
+@app.delete("/delele_document/{dataset_id}/documents/{document_id}")
+async def delete_document(dataset_id: str, document_id: str):
+    url = f'{dify_dataset_api_url}/{dataset_id}/documents/{document_id}'
+    headers = {'Authorization': f'Bearer {dify_dataset_api_key}'}
+    response = requests.delete(url, headers=headers)
+    if response.status_code == 204:
+        return {"message": "Document deleted successfully"}
+    else:
+        raise HTTPException(status_code=response.status_code, detail=response.text)
 
 
 
