@@ -92,6 +92,20 @@ async def create_document_by_file(
     else:
         raise HTTPException(status_code=response.status_code, detail=response.text)
 
+# 获取知识库中的文档列表
+@app.get("/datasets/{dataset_id}/documents")
+async def get_dataset_documents(dataset_id: str):
+    url = f'{dify_dataset_api_url}/{dataset_id}/documents'
+    headers = {'Authorization': f'Bearer {dify_dataset_api_key}'}
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise HTTPException(status_code=response.status_code, detail=response.text)
+
+
+
+
 
 ui.init(app)
 
