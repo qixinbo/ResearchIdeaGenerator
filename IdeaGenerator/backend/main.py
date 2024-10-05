@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from fastapi import FastAPI
-from InfoTracer.frontend import ui
+from IdeaGenerator.frontend import ui
 
 app = FastAPI()
 
