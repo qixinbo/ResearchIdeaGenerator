@@ -7,4 +7,8 @@ current_dir=$(dirname "$(readlink -f "$0")")
 echo ${current_dir}
 export PYTHONPATH="${current_dir}":${PYTHONPATH}
 
-bash IdeaGenerator/backend/start_backend.sh "$1"
+echo "---------- Start backend ----------"
+bash IdeaGenerator/backend/start_backend.sh "$1" &
+
+echo "---------- Start frontend ----------"
+bash IdeaGenerator/frontend/start_frontend.sh &

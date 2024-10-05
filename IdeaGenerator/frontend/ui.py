@@ -1,19 +1,19 @@
-from fastapi import FastAPI
+from nicegui import ui
+import os
 
-from nicegui import app, ui
+def handle_upload(e):
+    for file in e.files:
+        upload_dir = "uploads"
+        if not os.path.exists(upload_dir):
+            os.makedirs(upload_dir)
+        file_path = os.path.join(upload_dir, file.name)
+        with open(file_path, "wb") as f:
+            f.write(file.content)
+        ui.notify(f'文件 {file.name} 上传成功！')
 
+@ui.page('/')
+def main():
+    ui.label('多文件上传示例').classes('text-h3')
+    ui.upload(on_upload=handle_upload, multiple=True, label='选择文件').classes('max-w-full')
 
-def init(fastapi_app: FastAPI) -> None:
-    @ui.page("/")
-    def show():
-        ui.label("Hello, FastAPI!")
-
-        # NOTE dark mode will be persistent for each user across tabs and server restarts
-        ui.dark_mode().bind_value(app.storage.user, "dark_mode")
-        ui.checkbox("dark mode").bind_value(app.storage.user, "dark_mode")
-
-    ui.run_with(
-        fastapi_app,
-        mount_path="/",  # NOTE this can be omitted if you want the paths passed to @ui.page to be at the root
-        storage_secret="pick your private secret here",  # NOTE setting a secret is optional but allows for persistent storage per user
-    )
+ui.run(port=8888)

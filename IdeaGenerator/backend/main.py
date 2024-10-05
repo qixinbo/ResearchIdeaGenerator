@@ -7,8 +7,6 @@ import json
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
-from IdeaGenerator.frontend import ui
-
 load_dotenv()
 
 dify_dataset_api_key = os.getenv("DIFY_DATASET_API_KEY")
@@ -114,9 +112,6 @@ async def delete_document(dataset_id: str, document_id: str):
     else:
         raise HTTPException(status_code=response.status_code, detail=response.text)
 
-
-
-ui.init(app)
 
 if __name__ == "__main__":
     print(
