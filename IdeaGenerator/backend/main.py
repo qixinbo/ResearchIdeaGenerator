@@ -15,6 +15,13 @@ dify_dataset_api_url = dify_api_url + "/datasets"
 
 app = FastAPI()
 
+@app.post("/upload/")
+async def upload_file(file: UploadFile):
+    # In a real application, you'd process the file here
+    # For demonstration, we'll just return the file name and size
+    print("Received file:", file.filename, "with size:", len(await file.read()), "bytes")
+    return {"filename": file.filename, "size": len(await file.read())}
+
 # 创建空知识库
 @app.post("/create_dataset/")
 async def create_dataset(name: str, permission: str = "only_me"):

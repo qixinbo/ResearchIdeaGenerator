@@ -5,6 +5,10 @@
 #current_dir=$(dirname "$0")
 current_dir=$(dirname "$(readlink -f "$0")")
 echo ${current_dir}
+
+export APP_MODE="$1"
+echo ${APP_MODE}
+
 export PYTHONPATH="${current_dir}":${PYTHONPATH}
 
 echo "---------- Start backend ----------"
