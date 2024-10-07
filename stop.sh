@@ -36,5 +36,5 @@ kill_process_by_pid() {
 backend_pid=${backend_service_pid:-$(pgrep -f 'uvicorn main' | xargs -n1 | head -n1)}
 kill_process_by_pid "$backend_pid" "IdeaGenerator Backend Service"
 
-frontend_pid=${frontend_service_pid:-$(pgrep -f 'python ui.py' | xargs -n1 | head -n1)}
+frontend_pid=$(pgrep -f "node_modules/.bin/vite")
 kill_process_by_pid "$frontend_pid" "IdeaGenerator Frontend Service"
