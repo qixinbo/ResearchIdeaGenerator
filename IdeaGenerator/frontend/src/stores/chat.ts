@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { supabase } from '../utils/supabaseClient'
+import supabase from '../utils/supabaseClient'
 
 export const useChatStore = defineStore('chat', () => {
   const messages = ref([])
