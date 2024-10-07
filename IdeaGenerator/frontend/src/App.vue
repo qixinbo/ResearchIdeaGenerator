@@ -11,7 +11,7 @@ import Navbar from './components/Navbar.vue'
     </main>
     <footer class="bg-gray-800 text-white py-4">
       <div class="container mx-auto text-center">
-        &copy; 2024 OpenAI-inspired Website. All rights reserved.
+        &copy; 2024 Powered by Qi Xinbo. All rights reserved.
       </div>
     </footer>
   </div>

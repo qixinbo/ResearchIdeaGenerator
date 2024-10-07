@@ -1,5 +1,3 @@
-declare module '*.vue'
-
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
@@ -10,6 +8,7 @@ import Chat from './views/Chat.vue'
 import KnowledgeBase from './views/KnowledgeBase.vue'
 import Dashboard from './views/Dashboard.vue'
 import Login from './views/Login.vue'
+import PDFViewer from './views/PDFViewer.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -19,6 +18,7 @@ const router = createRouter({
     { path: '/knowledge-base', component: KnowledgeBase },
     { path: '/dashboard', component: Dashboard },
     { path: '/login', component: Login },
+    { path: '/pdf-viewer', component: PDFViewer },
   ]
 })
 
