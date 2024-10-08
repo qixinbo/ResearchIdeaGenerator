@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useKnowledgeBaseStore } from '../stores/knowledgeBase'
 
 const knowledgeBaseStore = useKnowledgeBaseStore()
 const searchQuery = ref('')
 const files = ref<File[]>([])
+const uploadProgress = ref(0)
+const showSuccessMessage = ref(false)
+const isUploading = ref(false)
 
 const searchKnowledgeBase = () => {
   knowledgeBaseStore.searchKnowledgeBase(searchQuery.value)
@@ -19,10 +22,28 @@ const handleFileUpload = (event: Event) => {
 
 const createKnowledgeBase = async () => {
   if (files.value.length > 0) {
-    await knowledgeBaseStore.createKnowledgeBase(files.value)
-    files.value = []
+    isUploading.value = true
+    uploadProgress.value = 0
+    try {
+      await knowledgeBaseStore.createKnowledgeBase(files.value, (progress) => {
+        uploadProgress.value = progress
+      })
+      files.value = []
+      showSuccessMessage.value = true
+      setTimeout(() => {
+        showSuccessMessage.value = false
+      }, 3000)
+    } catch (error) {
+      console.error('Upload failed:', error)
+    } finally {
+      isUploading.value = false
+    }
   }
 }
+
+const formattedProgress = computed(() => {
+  return `${Math.round(uploadProgress.value)}%`
+})
 </script>
 
 <template>
@@ -35,9 +56,14 @@ const createKnowledgeBase = async () => {
         <h3 class="text-2xl font-semibold mb-4 text-gray-700">Create Knowledge Base</h3>
         <div class="space-y-4">
           <input type="file" @change="handleFileUpload" multiple class="w-full p-2 border border-gray-300 rounded">
-          <button @click="createKnowledgeBase" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105">
-            Upload Files
+          <button @click="createKnowledgeBase" :disabled="isUploading" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+            {{ isUploading ? 'Uploading...' : 'Upload Files' }}
           </button>
+          <div v-if="isUploading" class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+            <div class="bg-blue-600 h-2.5 rounded-full" :style="{ width: formattedProgress }"></div>
+          </div>
+          <p v-if="isUploading" class="text-center text-gray-600">{{ formattedProgress }}</p>
+          <p v-if="showSuccessMessage" class="text-center text-green-600 font-semibold">Upload successful!</p>
         </div>
       </div>
 
