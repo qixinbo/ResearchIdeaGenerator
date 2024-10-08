@@ -62,9 +62,9 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
       kb.description.toLowerCase().includes(lowercaseQuery)
     ).map(kb => ({
       id: kb.id,
-      title: kb.name,
-      excerpt: kb.description,
-      url: `#/knowledge-base/${kb.id}` // 这里可以根据实际路由结构调整
+      name: kb.name,
+      description: kb.description,
+      created_at: kb.created_at
     }))
   }
 

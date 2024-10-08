@@ -107,8 +107,8 @@ const knowledgeBases = computed(() => knowledgeBaseStore.knowledgeBases)
       <h3 class="text-2xl font-semibold mb-6 text-gray-700">Search Results</h3>
       <ul class="space-y-6">
         <li v-for="result in knowledgeBaseStore.searchResults" :key="result.id" class="bg-white shadow-lg rounded-lg p-6 border border-gray-200 hover:shadow-xl transition duration-300 ease-in-out">
-          <h4 class="text-xl font-semibold mb-3 text-gray-800">{{ result.title }}</h4>
-          <p class="text-gray-600 mb-3">{{ result.excerpt }}</p>
+          <h4 class="text-xl font-semibold mb-3 text-gray-800">{{ result.name }}</h4>
+          <p class="text-gray-600 mb-3">{{ result.description }}</p>
           <a :href="result.url" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium hover:underline">Read more →</a>
         </li>
       </ul>
