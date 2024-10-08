@@ -20,12 +20,12 @@ const handleFileUpload = (event: Event) => {
   }
 }
 
-const createKnowledgeBase = async () => {
+const uploadFiles = async () => {
   if (files.value.length > 0) {
     isUploading.value = true
     uploadProgress.value = 0
     try {
-      await knowledgeBaseStore.createKnowledgeBase(files.value, (progress) => {
+      await knowledgeBaseStore.uploadFiles(files.value, (progress) => {
         uploadProgress.value = progress
       })
       files.value = []
@@ -53,10 +53,10 @@ const formattedProgress = computed(() => {
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       <!-- File upload section -->
       <div class="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-        <h3 class="text-2xl font-semibold mb-4 text-gray-700">Create Knowledge Base</h3>
+        <h3 class="text-2xl font-semibold mb-4 text-gray-700">Upload Files</h3>
         <div class="space-y-4">
           <input type="file" @change="handleFileUpload" multiple class="w-full p-2 border border-gray-300 rounded">
-          <button @click="createKnowledgeBase" :disabled="isUploading" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+          <button @click="uploadFiles" :disabled="isUploading" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
             {{ isUploading ? 'Uploading...' : 'Upload Files' }}
           </button>
           <div v-if="isUploading" class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">

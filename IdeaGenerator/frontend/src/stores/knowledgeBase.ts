@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
 import supabase from '../utils/supabaseClient'
-import axios from 'axios'
 
 export const useKnowledgeBaseStore = defineStore('knowledgeBase', {
   state: () => ({
@@ -11,7 +9,7 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', {
     async searchKnowledgeBase(query: string) {
       // Existing search functionality
     },
-    async createKnowledgeBase(files: File[], progressCallback: (progress: number) => void) {
+    async uploadFiles(files: File[], progressCallback: (progress: number) => void) {
       try {
         const uploadedFiles = [];
         const totalFiles = files.length;
@@ -31,11 +29,13 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', {
           console.log('File uploaded successfully:', data);
           
           // 获取文件的公共URL
-          const { data: { publicUrl }, error: urlError } = supabase.storage
+          const { data: urlData } = supabase.storage
             .from('knowledge-base-files')
             .getPublicUrl(fileName);
 
-          if (urlError) throw urlError;
+          if (!urlData || !urlData.publicUrl) throw new Error('Failed to get public URL');
+
+          const publicUrl = urlData.publicUrl;
 
           // 将文件信息插入到knowledge_base表中
           const { data: insertData, error: insertError } = await supabase
@@ -64,10 +64,10 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', {
           progressCallback(((i + 1) / totalFiles) * 100);
         }
 
-        console.log('Knowledge base created and stored in Supabase successfully', uploadedFiles);
+        console.log('Files uploaded and stored in Supabase successfully', uploadedFiles);
         return uploadedFiles;
       } catch (error) {
-        console.error('Error creating knowledge base', error);
+        console.error('Error uploading files', error);
         throw error;
       }
     },
