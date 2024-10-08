@@ -78,12 +78,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-200 to-purple-200 py-12 px-4">
+  <div class="min-h-screen bg-white py-12 px-4">
     <div class="max-w-7xl mx-auto">
-      <h2 class="text-5xl font-bold mb-12 text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-        PDF Viewer
-      </h2>
-
       <div v-if="isLoading" class="text-center">
         <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
         <p class="mt-4 text-blue-600 text-xl">Loading PDF files...</p>
@@ -93,45 +89,45 @@ onMounted(async () => {
         <p>{{ errorMessage }}</p>
       </div>
 
-      <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div v-else class="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <!-- File list -->
-        <div class="bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg p-8 rounded-2xl shadow-xl border border-white border-opacity-30 transition-all duration-300 hover:shadow-2xl hover:bg-opacity-30">
-          <h3 class="text-2xl font-semibold mb-6 text-blue-700">File List</h3>
-          <ul class="space-y-3">
+        <div class="bg-white p-6 rounded-lg shadow-md">
+          <h3 class="text-xl font-semibold mb-4 text-gray-700">File List</h3>
+          <ul class="space-y-2">
             <li v-for="file in pdfFiles" :key="file.name" 
                 @click="selectedFile = file; loadPDF(file.url)"
-                class="cursor-pointer p-4 rounded-xl transition-all duration-300 ease-in-out hover:bg-white hover:bg-opacity-50 hover:shadow-md">
+                class="cursor-pointer p-2 rounded-md transition-all duration-200 ease-in-out hover:bg-gray-100">
               <div class="flex items-center space-x-3">
-                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <svg class="w-6 h-6 flex-shrink-0 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                 </svg>
-                <span class="text-gray-800 text-lg">{{ file.name }}</span>
+                <span class="text-gray-700 text-sm break-all">{{ file.name }}</span>
               </div>
             </li>
           </ul>
         </div>
 
         <!-- PDF Viewer -->
-        <div class="lg:col-span-2 bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg p-8 rounded-2xl shadow-xl border border-white border-opacity-30 transition-all duration-300 hover:shadow-2xl hover:bg-opacity-30">
-          <h3 class="text-2xl font-semibold mb-6 text-blue-700">PDF Viewer</h3>
+        <div class="lg:col-span-3 bg-white p-6 rounded-lg shadow-md">
+          <h3 class="text-xl font-semibold mb-4 text-gray-700">PDF Viewer</h3>
           <div v-if="selectedFile" class="w-full">
-            <div class="mb-6 flex justify-center space-x-4">
-              <button @click="zoomOut" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-md hover:shadow-lg">
+            <div class="mb-4 flex justify-start space-x-2">
+              <button @click="zoomOut" class="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors">
                 Zoom Out
               </button>
-              <button @click="resetZoom" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-md hover:shadow-lg">
+              <button @click="resetZoom" class="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors">
                 Reset Zoom
               </button>
-              <button @click="zoomIn" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-md hover:shadow-lg">
+              <button @click="zoomIn" class="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors">
                 Zoom In
               </button>
             </div>
-            <div class="overflow-auto bg-white rounded-xl shadow-inner">
+            <div class="overflow-auto bg-gray-100 rounded-md shadow-inner">
               <div id="pdf-container" class="mx-auto"></div>
             </div>
           </div>
-          <div v-else class="flex items-center justify-center h-96 text-gray-500 bg-white bg-opacity-50 rounded-xl">
-            <p class="text-center text-xl">Select a file to view its content</p>
+          <div v-else class="flex items-center justify-center h-96 text-gray-500 bg-gray-100 rounded-md">
+            <p class="text-center text-lg">Select a file to view its content</p>
           </div>
         </div>
       </div>
@@ -152,20 +148,20 @@ body {
 }
 
 #pdf-container::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 #pdf-container::-webkit-scrollbar-track {
-  background: #e2e8f0;
+  background: #f1f1f1;
 }
 
 #pdf-container::-webkit-scrollbar-thumb {
-  background-color: #a0aec0;
+  background-color: #c0c0c0;
   border-radius: 20px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid #f1f1f1;
 }
 
-.backdrop-blur-lg {
-  backdrop-filter: blur(20px);
+.break-all {
+  word-break: break-all;
 }
 </style>

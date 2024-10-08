@@ -2,12 +2,59 @@ import { defineStore } from 'pinia'
 import supabase from '../utils/supabaseClient'
 import { ref } from 'vue'
 
+interface KnowledgeBase {
+  id: string;
+  name: string;
+  description: string;
+  created_at: string;
+}
+
 export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
   const searchResults = ref([])
   const uploadProgress = ref(0)
+  const knowledgeBases = ref<KnowledgeBase[]>([
+    {
+      id: '1',
+      name: 'Marketing Strategies',
+      description: 'A collection of documents about various marketing strategies',
+      created_at: '2023-05-01T10:00:00Z'
+    },
+    {
+      id: '2',
+      name: 'Product Development',
+      description: 'Resources for product development and management',
+      created_at: '2023-05-02T11:00:00Z'
+    },
+    {
+      id: '3',
+      name: 'Customer Support',
+      description: 'Guidelines and best practices for customer support',
+      created_at: '2023-05-03T09:30:00Z'
+    }
+  ])
 
-  async function searchKnowledgeBase(query: string) {
-    // Existing search functionality
+  function createKnowledgeBase(name: string, description: string) {
+    const newKnowledgeBase: KnowledgeBase = {
+      id: (knowledgeBases.value.length + 1).toString(),
+      name,
+      description,
+      created_at: new Date().toISOString()
+    }
+    knowledgeBases.value.push(newKnowledgeBase)
+    return newKnowledgeBase
+  }
+
+  function searchKnowledgeBase(query: string) {
+    const lowercaseQuery = query.toLowerCase()
+    searchResults.value = knowledgeBases.value.filter(kb => 
+      kb.name.toLowerCase().includes(lowercaseQuery) || 
+      kb.description.toLowerCase().includes(lowercaseQuery)
+    ).map(kb => ({
+      id: kb.id,
+      title: kb.name,
+      excerpt: kb.description,
+      url: `#/knowledge-base/${kb.id}` // 这里可以根据实际路由结构调整
+    }))
   }
 
   async function uploadFiles(files: File[]) {
@@ -73,6 +120,8 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
   return {
     searchResults,
     uploadProgress,
+    knowledgeBases,
+    createKnowledgeBase,
     searchKnowledgeBase,
     uploadFiles
   }

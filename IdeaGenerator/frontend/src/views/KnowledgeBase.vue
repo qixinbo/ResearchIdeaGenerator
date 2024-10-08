@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useKnowledgeBaseStore } from '../stores/knowledgeBase'
+import CreateKnowledgeBase from './CreateKnowledgeBase.vue'
 
 const knowledgeBaseStore = useKnowledgeBaseStore()
 const searchQuery = ref('')
@@ -48,6 +49,9 @@ watch(() => knowledgeBaseStore.uploadProgress, (newProgress) => {
   currentProgress.value = newProgress
   console.log('Progress updated:', newProgress) // 添加日志
 })
+
+// 添加一个计算属性来获取知识库列表
+const knowledgeBases = computed(() => knowledgeBaseStore.knowledgeBases)
 </script>
 
 <template>
@@ -55,6 +59,9 @@ watch(() => knowledgeBaseStore.uploadProgress, (newProgress) => {
     <h2 class="text-3xl font-bold mb-8 text-center text-gray-800">Knowledge Base</h2>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Create Knowledge Base section -->
+      <CreateKnowledgeBase />
+
       <!-- File upload section -->
       <div class="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
         <h3 class="text-2xl font-semibold mb-4 text-gray-700">Upload Files</h3>
@@ -81,6 +88,18 @@ watch(() => knowledgeBaseStore.uploadProgress, (newProgress) => {
           </button>
         </div>
       </div>
+    </div>
+
+    <!-- Knowledge Base List -->
+    <div class="mt-12">
+      <h3 class="text-2xl font-semibold mb-6 text-gray-700">Knowledge Bases</h3>
+      <ul class="space-y-6">
+        <li v-for="kb in knowledgeBases" :key="kb.id" class="bg-white shadow-lg rounded-lg p-6 border border-gray-200 hover:shadow-xl transition duration-300 ease-in-out">
+          <h4 class="text-xl font-semibold mb-3 text-gray-800">{{ kb.name }}</h4>
+          <p class="text-gray-600 mb-3">{{ kb.description }}</p>
+          <p class="text-sm text-gray-500">Created at: {{ new Date(kb.created_at).toLocaleString() }}</p>
+        </li>
+      </ul>
     </div>
 
     <!-- Search results -->
