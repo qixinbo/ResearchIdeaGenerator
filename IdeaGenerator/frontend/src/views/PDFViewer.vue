@@ -50,6 +50,18 @@ const loadPDF = async (url: string) => {
   }
 }
 
+const zoomIn = () => {
+  // 实现放大功能
+}
+
+const zoomOut = () => {
+  // 实现缩小功能
+}
+
+const resetZoom = () => {
+  // 实现重置缩放功能
+}
+
 onMounted(async () => {
   try {
     const { data, error } = await supabase.storage

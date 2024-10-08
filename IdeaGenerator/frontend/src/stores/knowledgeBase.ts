@@ -2,6 +2,17 @@ import { defineStore } from 'pinia'
 import supabase from '../utils/supabaseClient'
 import { ref } from 'vue'
 
+// Rename the type alias to KnowledgeBaseItem
+type KnowledgeBaseItem = {
+  id: string;
+  name: string;  // Add this line
+  description: string;
+  created_at: string;
+};
+
+// Use KnowledgeBaseItem[] for arrays of knowledge base items
+const _searchResults = ref<KnowledgeBaseItem[]>([]);
+
 interface KnowledgeBase {
   id: string;
   name: string;
@@ -10,9 +21,9 @@ interface KnowledgeBase {
 }
 
 export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
-  const searchResults = ref([])
+  const searchResults = ref<KnowledgeBaseItem[]>([])
   const uploadProgress = ref(0)
-  const knowledgeBases = ref<KnowledgeBase[]>([
+  const knowledgeBases = ref<KnowledgeBaseItem[]>([
     {
       id: '1',
       name: 'Marketing Strategies',
@@ -34,7 +45,7 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
   ])
 
   function createKnowledgeBase(name: string, description: string) {
-    const newKnowledgeBase: KnowledgeBase = {
+    const newKnowledgeBase: KnowledgeBaseItem = {
       id: (knowledgeBases.value.length + 1).toString(),
       name,
       description,
@@ -45,7 +56,7 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
   }
 
   function searchKnowledgeBase(query: string) {
-    const lowercaseQuery = query.toLowerCase()
+    const lowercaseQuery = query.toLowerCase();
     searchResults.value = knowledgeBases.value.filter(kb => 
       kb.name.toLowerCase().includes(lowercaseQuery) || 
       kb.description.toLowerCase().includes(lowercaseQuery)
