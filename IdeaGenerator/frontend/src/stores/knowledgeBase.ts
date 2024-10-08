@@ -11,9 +11,9 @@ type KnowledgeBaseItem = {
 };
 
 // Use KnowledgeBaseItem[] for arrays of knowledge base items
-const _searchResults = ref<KnowledgeBaseItem[]>([]);
+export const _searchResults = ref<KnowledgeBaseItem[]>([]);
 
-interface KnowledgeBase {
+export interface KnowledgeBase {
   id: string;
   name: string;
   description: string;
@@ -79,7 +79,7 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
         const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
         
         // 上传文件到Supabase存储
-        const { data, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('knowledge-base-files')
           .upload(fileName, file);
 
@@ -93,7 +93,7 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
 
         const publicUrl = urlData.publicUrl;
 
-        const { data: insertData, error: insertError } = await supabase
+        const { error: insertError } = await supabase
           .from('knowledge_base')
           .insert({
             file_name: file.name,

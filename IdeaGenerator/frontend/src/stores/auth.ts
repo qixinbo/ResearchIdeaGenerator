@@ -1,30 +1,28 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import supabase from '../utils/supabaseClient'
+
+// Add this type definition at the top of the file
+type User = { email: string } | null
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref(null)
+  const user = ref<User>(null)
   const isAuthenticated = ref(false)
 
-  const login = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) throw error
-    user.value = data.user
+  const login = async (email: string) => {
+    // 模拟登录逻辑
+    user.value = { email } // 简化的用户对象
     isAuthenticated.value = true
   }
 
-  const logout = async () => {
-    await supabase.auth.signOut()
+  const logout = () => {
     user.value = null
     isAuthenticated.value = false
   }
 
-  const checkAuth = async () => {
-    const { data } = await supabase.auth.getSession()
-    if (data.session) {
-      user.value = data.session.user
-      isAuthenticated.value = true
-    }
+  const checkAuth = () => {
+    // 模拟检查认证状态
+    // 这里可以根据需要实现，例如检查本地存储
+    return isAuthenticated.value
   }
 
   return { user, isAuthenticated, login, logout, checkAuth }
