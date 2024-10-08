@@ -22,15 +22,15 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', {
           // 上传文件到Supabase存储
           console.log('Uploading file:', fileName, 'to bucket:', 'knowledge-base-files');
           const { data, error: uploadError } = await supabase.storage
-            .from('knowledge-base-files') // 确保这个bucket已经在Supabase中创建
+            .from('knowledge-base-files') // 确保这个bucket已经在Supabase中创建，并设置为公共访问
             .upload(fileName, file);
 
           if (uploadError) throw uploadError;
-
-          // 获取文件的签名URL
-          const { data: { signedUrl }, error: urlError } = await supabase.storage
+          console.log('File uploaded successfully:', data);
+          // 获取文件的公共URL
+          const { data: { publicUrl }, error: urlError } = supabase.storage
             .from('knowledge-base-files')
-            .createSignedUrl(fileName, 60 * 60) // URL有效期为1小时
+            .getPublicUrl(fileName);
 
           if (urlError) throw urlError;
 
@@ -39,7 +39,7 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', {
             .from('knowledge_base')
             .insert({
               file_name: file.name,
-              file_url: fileName, // 存储文件名而不是URL
+              file_url: publicUrl, // 存储公共URL
               file_type: file.type,
               file_size: file.size,
               metadata: {
@@ -52,7 +52,7 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', {
 
           uploadedFiles.push({
             name: file.name,
-            url: signedUrl,
+            url: publicUrl,
             size: file.size,
             type: file.type
           });
