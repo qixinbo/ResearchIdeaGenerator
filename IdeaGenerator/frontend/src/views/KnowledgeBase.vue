@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useKnowledgeBaseStore } from '../stores/knowledgeBase'
 
 const knowledgeBaseStore = useKnowledgeBaseStore()
 const searchQuery = ref('')
 const files = ref<File[]>([])
-const uploadProgress = ref(0)
 const showSuccessMessage = ref(false)
 const isUploading = ref(false)
+const currentProgress = ref(0)
 
 const searchKnowledgeBase = () => {
   knowledgeBaseStore.searchKnowledgeBase(searchQuery.value)
@@ -23,11 +23,9 @@ const handleFileUpload = (event: Event) => {
 const uploadFiles = async () => {
   if (files.value.length > 0) {
     isUploading.value = true
-    uploadProgress.value = 0
+    currentProgress.value = 0
     try {
-      await knowledgeBaseStore.uploadFiles(files.value, (progress) => {
-        uploadProgress.value = progress
-      })
+      await knowledgeBaseStore.uploadFiles(files.value)
       files.value = []
       showSuccessMessage.value = true
       setTimeout(() => {
@@ -42,7 +40,13 @@ const uploadFiles = async () => {
 }
 
 const formattedProgress = computed(() => {
-  return `${Math.round(uploadProgress.value)}%`
+  return `${currentProgress.value}%`
+})
+
+// 添加 watch 来监听 store 中的 uploadProgress 变化
+watch(() => knowledgeBaseStore.uploadProgress, (newProgress) => {
+  currentProgress.value = newProgress
+  console.log('Progress updated:', newProgress) // 添加日志
 })
 </script>
 
