@@ -12,6 +12,7 @@
     "@supabase/supabase-js": "^2.39.8",
     "@types/axios": "^0.14.0",
     "axios": "^1.7.7",
+    "pdfjs-dist": "^4.7.76",
     "pinia": "^2.1.7",
     "vue": "^3.4.38",
     "vue-pdf-embed": "^2.1.0",

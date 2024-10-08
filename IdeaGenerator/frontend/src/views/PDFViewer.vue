@@ -1,17 +1,25 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import VuePdfEmbed from 'vue-pdf-embed'
+import * as pdfjsLib from 'pdfjs-dist'
+import { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api'
 import supabase from '../utils/supabaseClient'
+
+// 设置 PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
 interface PDFFile {
   id: string;
   name: string;
-  url: string | null;
+  url: string;
 }
 
 const pdfFiles = ref<PDFFile[]>([])
 const selectedFileId = ref<string | null>(null)
 const isLoading = ref(true)
+const errorMessage = ref<string | null>(null)
+const pdfDocument = ref<PDFDocumentProxy | null>(null)
+const currentPage = ref(1)
+const scale = ref(1.5)
 
 const selectedFile = computed(() => 
   pdfFiles.value.find(file => file.id === selectedFileId.value)
@@ -20,40 +28,115 @@ const selectedFile = computed(() =>
 const selectFile = async (fileId: string) => {
   selectedFileId.value = fileId
   const file = pdfFiles.value.find(f => f.id === fileId)
-  if (file && !file.url) {
-    try {
-      const { data, error } = await supabase.storage
-        .from('knowledge-base-files')
-        .createSignedUrl(file.name, 3600) // URL有效期为1小时
+  if (file) {
+    console.log('Selected file URL:', file.url)
+    await loadPDF(file.url)
+  }
+}
 
-      if (error) throw error
-      file.url = data.signedUrl
-    } catch (error) {
-      console.error('Error getting signed URL:', error)
+const loadPDF = async (url: string) => {
+  console.log('Starting to load PDF from URL:', url);
+  try {
+    const loadingTask = pdfjsLib.getDocument(url);
+    pdfDocument.value = await loadingTask.promise;
+    console.log(`PDF loaded successfully. Total pages: ${pdfDocument.value.numPages}`);
+    currentPage.value = 1;
+    renderPage();
+  } catch (error) {
+    console.error('Error loading PDF:', error);
+    if (error instanceof Error) {
+      errorMessage.value = `Error loading PDF: ${error.message}`;
+    } else {
+      errorMessage.value = 'An unknown error occurred while loading the PDF';
     }
+  }
+}
+
+const renderPage = async () => {
+  if (!pdfDocument.value) return;
+
+  try {
+    const page = await pdfDocument.value.getPage(currentPage.value);
+    const viewport = page.getViewport({ scale: scale.value });
+
+    const canvas = document.getElementById('pdf-canvas') as HTMLCanvasElement;
+    const context = canvas.getContext('2d');
+    if (!context) {
+      throw new Error('Unable to get canvas context');
+    }
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    const renderContext = {
+      canvasContext: context,
+      viewport: viewport
+    };
+    await page.render(renderContext).promise;
+  } catch (error) {
+    console.error('Error rendering PDF page:', error);
+    errorMessage.value = 'Error rendering PDF page';
+  }
+}
+
+const nextPage = () => {
+  if (pdfDocument.value && currentPage.value < pdfDocument.value.numPages) {
+    currentPage.value++;
+    renderPage();
+  }
+}
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+    renderPage();
   }
 }
 
 onMounted(async () => {
   try {
-    // 获取存储桶中的文件列表
+    console.log('Supabase URL:', supabase.supabaseUrl);
     const { data, error } = await supabase.storage
       .from('knowledge-base-files')
       .list()
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase storage error:', error);
+      throw error;
+    }
 
-    // 过滤出PDF文件并创建pdfFiles数组
-    pdfFiles.value = data
-      .filter(item => item.name.toLowerCase().endsWith('.pdf'))
-      .map(item => ({
+    console.log('Raw file list:', data)
+
+    if (!data || data.length === 0) {
+      errorMessage.value = 'No files found in the storage bucket.'
+      return
+    }
+
+    const pdfData = data.filter(item => item.name.toLowerCase().endsWith('.pdf'))
+    
+    console.log('Filtered PDF files:', pdfData)
+
+    pdfFiles.value = await Promise.all(pdfData.map(async item => {
+      const { data: urlData } = supabase.storage
+        .from('knowledge-base-files')
+        .getPublicUrl(item.name)
+
+      console.log('Generated public URL:', urlData.publicUrl)
+      return {
         id: item.id,
         name: item.name,
-        url: null // 初始时URL为null，选择文件时再获取签名URL
-      }))
+        url: urlData.publicUrl
+      }
+    }))
+
+    console.log('Processed PDF files:', pdfFiles.value)
+
+    if (pdfFiles.value.length === 0) {
+      errorMessage.value = 'No PDF files found in the storage bucket.'
+    }
 
   } catch (error) {
     console.error('Error fetching PDF files:', error)
+    errorMessage.value = `Error fetching files: ${error.message}`
   } finally {
     isLoading.value = false
   }
@@ -67,6 +150,14 @@ onMounted(async () => {
 
       <div v-if="isLoading" class="text-center">
         <p class="text-xl text-indigo-600">Loading PDF files...</p>
+      </div>
+
+      <div v-else-if="errorMessage" class="text-center text-red-600">
+        <p>{{ errorMessage }}</p>
+      </div>
+
+      <div v-else-if="pdfFiles.length === 0" class="text-center text-indigo-600">
+        <p>No PDF files found in the storage bucket.</p>
       </div>
 
       <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -91,11 +182,16 @@ onMounted(async () => {
         <!-- PDF Viewer -->
         <div class="lg:col-span-2 bg-white bg-opacity-50 backdrop-filter backdrop-blur-lg rounded-2xl shadow-xl p-6 border border-indigo-200">
           <h3 class="text-2xl font-semibold mb-4 text-indigo-800">PDF Viewer</h3>
-          <div v-if="selectedFile" class="w-full h-[600px] rounded-lg overflow-hidden shadow-inner">
-            <VuePdfEmbed :source="selectedFile.url" />
+          <div v-if="selectedFile" class="w-full rounded-lg overflow-hidden shadow-inner">
+            <canvas id="pdf-canvas" class="mx-auto"></canvas>
+            <div class="mt-4 flex justify-center space-x-4">
+              <button @click="prevPage" class="px-4 py-2 bg-blue-500 text-white rounded" :disabled="currentPage === 1">Previous</button>
+              <span>Page {{ currentPage }} of {{ pdfDocument?.numPages || 0 }}</span>
+              <button @click="nextPage" class="px-4 py-2 bg-blue-500 text-white rounded" :disabled="!pdfDocument || currentPage === pdfDocument.numPages">Next</button>
+            </div>
           </div>
           <div v-else class="flex items-center justify-center h-[600px] text-center text-indigo-600 bg-indigo-50 rounded-lg">
-            <p class="text-xl">Select a file to view</p>
+            <p class="text-xl">Select a file to view its content</p>
           </div>
         </div>
       </div>
